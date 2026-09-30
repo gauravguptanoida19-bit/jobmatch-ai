@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { ClientMockProvider } from '@/components/providers/ClientMockProvider';
 
 export const metadata: Metadata = {
   title: 'JobMatch AI — AI-Powered Job Matching & Candidate Intelligence Platform',
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <ClientMockProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ClientMockProvider>
       </body>
     </html>
   );

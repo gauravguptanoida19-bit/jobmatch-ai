@@ -1,6 +1,7 @@
 # JobMatch AI — AI-Powered Job Matching & Candidate Intelligence Platform
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fgauravguptanoida19-bit%2Fjobmatch-ai)
+> 🌐 **Live Demo on GitHub Pages**: [https://gauravguptanoida19-bit.github.io/jobmatch-ai/](https://gauravguptanoida19-bit.github.io/jobmatch-ai/)  
+> [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fgauravguptanoida19-bit%2Fjobmatch-ai)
 
 **JobMatch AI** is a production-grade recruitment technology and talent intelligence platform engineered with Next.js 15, PostgreSQL, pgvector, and OpenAI-compatible LLMs. It addresses the fundamental flaw of legacy keyword-matching Applicant Tracking Systems (ATS) by pairing high-dimensional semantic vector search with a transparent, 5-factor hybrid scoring algorithm.
 

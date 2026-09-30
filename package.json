@@ -10,6 +10,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx scripts/seed.ts",
+    "build:pages": "node scripts/build-pages.mjs",
     "test:engine": "tsx scripts/test-engine.ts"
   },
   "dependencies": {
