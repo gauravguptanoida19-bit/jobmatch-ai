@@ -1,0 +1,173 @@
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+enum Role {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  password         String
+  name             String
+  role             Role              @default(CANDIDATE)
+  avatar           String?           @default("")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  candidateProfile CandidateProfile?
+  recruiterProfile RecruiterProfile?
+}
+
+model CandidateProfile {
+  id                String           @id @default(cuid())
+  userId            String           @unique
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline          String?
+  bio               String?          @db.Text
+  location          String?
+  phone             String?
+  website           String?
+  github            String?
+  linkedin          String?
+  yearsOfExperience Float            @default(0)
+  educationLevel    String?          @default("Bachelor's")
+  currentRole       String?
+  desiredRole       String?
+  desiredSalary     Int?             @default(0)
+  remotePreference  String           @default("HYBRID") // REMOTE, HYBRID, ONSITE, ANY
+  skills            CandidateSkill[]
+  resumes           Resume[]
+  applications      Application[]
+  matches           MatchResult[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+model RecruiterProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName    String
+  companyWebsite String?
+  department     String?
+  jobs           Job[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Resume {
+  id                 String                       @id @default(cuid())
+  candidateProfileId String
+  candidateProfile   CandidateProfile             @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  fileName           String
+  rawText            String                       @db.Text
+  parsedData         Json
+  embedding          Unsupported("vector(1536)")?
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+}
+
+model Skill {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  category        String           @default("OTHER") // LANGUAGE, FRAMEWORK, DATABASE, CLOUD, TOOL, AI_ML, OTHER
+  candidateSkills CandidateSkill[]
+  jobSkills       JobSkill[]
+}
+
+model CandidateSkill {
+  id                 String           @id @default(cuid())
+  candidateProfileId String
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  skillId            String
+  skill              Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  yearsExperience    Float            @default(1)
+  level              String           @default("INTERMEDIATE") // BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+
+  @@unique([candidateProfileId, skillId])
+}
+
+model Job {
+  id                 String                       @id @default(cuid())
+  recruiterProfileId String
+  recruiterProfile   RecruiterProfile             @relation(fields: [recruiterProfileId], references: [id], onDelete: Cascade)
+  title              String
+  company            String
+  department         String?
+  location           String
+  type               String                       @default("FULL_TIME") // FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP
+  remoteType         String                       @default("HYBRID") // REMOTE, HYBRID, ONSITE
+  minExperience      Int                          @default(0)
+  maxExperience      Int                          @default(10)
+  educationLevel     String                       @default("Bachelor's")
+  minSalary          Int                          @default(80000)
+  maxSalary          Int                          @default(150000)
+  description        String                       @db.Text
+  requirements       String?                      @db.Text
+  benefits           String?                      @db.Text
+  status             String                       @default("OPEN") // OPEN, CLOSED, DRAFT
+  embedding          Unsupported("vector(1536)")?
+  skills             JobSkill[]
+  applications       Application[]
+  matches            MatchResult[]
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+}
+
+model JobSkill {
+  id         String  @id @default(cuid())
+  jobId      String
+  job        Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skillId    String
+  skill      Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  isRequired Boolean @default(true)
+
+  @@unique([jobId, skillId])
+}
+
+model Application {
+  id                 String           @id @default(cuid())
+  jobId              String
+  job                Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateProfileId String
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  status             String           @default("APPLIED") // APPLIED, SCREENING, INTERVIEW, OFFER, REJECTED, WITHDRAWN
+  coverLetter        String?          @db.Text
+  matchScore         Float            @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@unique([jobId, candidateProfileId])
+}
+
+model MatchResult {
+  id                 String           @id @default(cuid())
+  jobId              String
+  job                Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateProfileId String
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  overallScore       Float
+  skillScore         Float
+  semanticScore      Float
+  experienceScore    Float
+  educationScore     Float
+  preferenceScore    Float
+  matchingSkills     Json
+  missingSkills      Json
+  reasoning          Json
+  recommendations    String           @db.Text
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@unique([jobId, candidateProfileId])
+}
