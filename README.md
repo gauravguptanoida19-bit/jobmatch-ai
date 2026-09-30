@@ -31,8 +31,8 @@ graph TD
     end
 
     subgraph Data ["Database Layer"]
-        Postgres[(PostgreSQL 16 + pgvector Extension)]
-        PrismaORM[Prisma ORM Client & Raw Vector Operators (<=>)]
+        Postgres[("PostgreSQL 16 + pgvector Extension")]
+        PrismaORM["Prisma ORM Client & Raw Vector Operators"]
     end
 
     Client --> API
