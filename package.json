@@ -11,7 +11,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx scripts/seed.ts",
     "build:pages": "node scripts/build-pages.mjs",
-    "deploy": "npm run build:pages && npx gh-pages -d out --dotfiles -b gh-pages",
+    "deploy": "npm run build:pages && npx gh-pages -d out --dotfiles -b gh-pages && git checkout main",
     "test:engine": "tsx scripts/test-engine.ts"
   },
   "dependencies": {
