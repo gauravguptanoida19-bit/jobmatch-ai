@@ -58,13 +58,19 @@ export default function CandidateDashboard() {
       ]);
 
       if (profRes.ok) {
-        const profData = await profRes.json();
-        setProfile(profData.profile);
+        const ct = profRes.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const profData = await profRes.json();
+          setProfile(profData.profile);
+        }
       }
 
       if (recRes.ok) {
-        const recData = await recRes.json();
-        setRecommendations(recData.recommendations || []);
+        const ct = recRes.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          const recData = await recRes.json();
+          setRecommendations(recData.recommendations || []);
+        }
       }
     } catch (err) {
       console.error('Failed to load candidate dashboard data:', err);
@@ -104,7 +110,19 @@ export default function CandidateDashboard() {
         body: formData,
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        try {
+          data = JSON.parse(text);
+        } catch (_) {
+          throw new Error('Server returned an unexpected response format.');
+        }
+      }
+
       if (!res.ok) {
         throw new Error(data.error || 'Failed to upload resume');
       }

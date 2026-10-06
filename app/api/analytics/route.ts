@@ -33,7 +33,7 @@ export async function GET() {
     const avgMatchScore =
       applications.length > 0
         ? Math.round(
-            applications.reduce((acc, a) => acc + (a.matchScore || 0), 0) /
+            applications.reduce((acc: number, a: any) => acc + (a.matchScore || 0), 0) /
               applications.length
           )
         : 78;
@@ -47,7 +47,7 @@ export async function GET() {
       { name: '<60%', count: 0 },
     ];
 
-    applications.forEach((a) => {
+    applications.forEach((a: any) => {
       const s = a.matchScore || 0;
       if (s >= 90) scoreRanges[0].count++;
       else if (s >= 80) scoreRanges[1].count++;
@@ -64,7 +64,7 @@ export async function GET() {
       OFFER: 0,
       REJECTED: 0,
     };
-    applications.forEach((a) => {
+    applications.forEach((a: any) => {
       if (statusCounts[a.status] !== undefined) {
         statusCounts[a.status]++;
       }
@@ -79,12 +79,12 @@ export async function GET() {
 
     // Skills in demand vs candidate availability
     const jobSkillFrequency: Record<string, number> = {};
-    jobSkills.forEach((js) => {
+    jobSkills.forEach((js: any) => {
       jobSkillFrequency[js.skill.name] = (jobSkillFrequency[js.skill.name] || 0) + 1;
     });
 
     const candidateSkillFrequency: Record<string, number> = {};
-    candidateSkills.forEach((cs) => {
+    candidateSkills.forEach((cs: any) => {
       candidateSkillFrequency[cs.skill.name] =
         (candidateSkillFrequency[cs.skill.name] || 0) + 1;
     });

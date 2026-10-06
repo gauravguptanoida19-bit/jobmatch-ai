@@ -37,26 +37,54 @@ export default function RegisterPage() {
         }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        try {
+          data = JSON.parse(text);
+        } catch (_) {
+          throw new Error('Server returned an unexpected format. Please try again.');
+        }
+      }
+
       if (!res.ok) {
         throw new Error(data.error || 'Failed to register account');
       }
 
-      // Automatically sign in the newly registered user
-      const loginRes = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
+      // In client environments, store active session in localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(
+            'jobmatch_session',
+            JSON.stringify({
+              id: data.user?.id,
+              name: data.user?.name || name,
+              email: data.user?.email || email,
+              role: data.user?.role || role,
+              candidateProfileId: data.user?.candidateProfileId,
+              recruiterProfileId: data.user?.recruiterProfileId,
+            })
+          );
+        } catch (_) {}
+      }
 
-      if (loginRes?.ok) {
-        if (role === 'RECRUITER') {
-          router.push('/dashboard/recruiter');
-        } else {
-          router.push('/dashboard/candidate');
-        }
+      // Automatically attempt NextAuth sign in if available
+      try {
+        await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        });
+      } catch (_) {}
+
+      // Seamlessly redirect directly to the corresponding dashboard
+      if (role === 'RECRUITER') {
+        router.push('/dashboard/recruiter');
       } else {
-        router.push('/login');
+        router.push('/dashboard/candidate');
       }
     } catch (err) {
       setError((err as Error).message);

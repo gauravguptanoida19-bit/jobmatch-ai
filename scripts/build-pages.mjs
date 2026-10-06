@@ -5,7 +5,7 @@ import path from 'path';
 console.log('?? Building JobMatch AI for GitHub Pages...');
 
 const apiDir = path.resolve('app/api');
-const apiBackup = path.resolve('app/_api_backup');
+const apiBackup = path.resolve('_api_backup');
 
 let moved = false;
 try {
@@ -24,6 +24,7 @@ try {
       ...process.env,
       OUTPUT_EXPORT: 'true',
       GITHUB_ACTIONS: 'true',
+      NEXT_PUBLIC_STATIC_EXPORT: 'true',
     },
   });
 

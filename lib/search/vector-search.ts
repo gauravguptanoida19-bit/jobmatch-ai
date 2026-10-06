@@ -42,23 +42,7 @@ export async function searchJobsSemantically(
   const vectorStr = `[${queryEmbedding.join(',')}]`;
 
   try {
-    const rawResults = await prisma.$queryRawUnsafe<
-      Array<{
-        id: string;
-        title: string;
-        company: string;
-        location: string;
-        remoteType: string;
-        type: string;
-        minExperience: number;
-        maxExperience: number;
-        educationLevel: string;
-        minSalary: number;
-        maxSalary: number;
-        description: string;
-        similarity: number;
-      }>
-    >(
+    const rawResults = (await (prisma as any).$queryRawUnsafe(
       `
       SELECT 
         j.id, 
@@ -81,21 +65,21 @@ export async function searchJobsSemantically(
     `,
       vectorStr,
       limit
-    );
+    )) as any[];
 
     if (rawResults && rawResults.length > 0) {
-      const jobIds = rawResults.map((r) => r.id);
+      const jobIds = rawResults.map((r: any) => r.id);
       const skills = await prisma.jobSkill.findMany({
         where: { jobId: { in: jobIds } },
         include: { skill: true },
       });
 
-      return rawResults.map((r) => ({
+      return rawResults.map((r: any) => ({
         ...r,
         similarity: Math.max(0, Math.min(1, r.similarity)),
-        skills: skills
-          .filter((s) => s.jobId === r.id)
-          .map((s) => ({ name: s.skill.name, isRequired: s.isRequired })),
+        skills: (skills as any[])
+          .filter((s: any) => s.jobId === r.id)
+          .map((s: any) => ({ name: s.skill.name, isRequired: s.isRequired })),
       }));
     }
   } catch (err) {
@@ -191,20 +175,7 @@ export async function searchCandidatesSemantically(
   const vectorStr = `[${queryEmbedding.join(',')}]`;
 
   try {
-    const rawResults = await prisma.$queryRawUnsafe<
-      Array<{
-        id: string;
-        userId: string;
-        name: string;
-        email: string;
-        headline: string | null;
-        location: string | null;
-        yearsOfExperience: number;
-        educationLevel: string | null;
-        remotePreference: string;
-        similarity: number;
-      }>
-    >(
+    const rawResults = (await (prisma as any).$queryRawUnsafe(
       `
       SELECT 
         cp.id,
@@ -226,21 +197,21 @@ export async function searchCandidatesSemantically(
     `,
       vectorStr,
       limit
-    );
+    )) as any[];
 
     if (rawResults && rawResults.length > 0) {
-      const candidateIds = rawResults.map((r) => r.id);
+      const candidateIds = rawResults.map((r: any) => r.id);
       const skills = await prisma.candidateSkill.findMany({
         where: { candidateProfileId: { in: candidateIds } },
         include: { skill: true },
       });
 
-      return rawResults.map((r) => ({
+      return rawResults.map((r: any) => ({
         ...r,
         similarity: Math.max(0, Math.min(1, r.similarity)),
-        skills: skills
-          .filter((s) => s.candidateProfileId === r.id)
-          .map((s) => ({
+        skills: (skills as any[])
+          .filter((s: any) => s.candidateProfileId === r.id)
+          .map((s: any) => ({
             name: s.skill.name,
             level: s.level,
             yearsExperience: s.yearsExperience,

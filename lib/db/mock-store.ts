@@ -557,12 +557,48 @@ class MockStore {
         recruiterProfileId: 'rec-1',
       },
     ];
+
+    this.loadFromStorage();
+  }
+
+  loadFromStorage() {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      const data = localStorage.getItem('jobmatch_mock_store');
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed.candidates) && parsed.candidates.length > 0) {
+          this.candidates = parsed.candidates;
+        }
+        if (Array.isArray(parsed.jobs) && parsed.jobs.length > 0) {
+          this.jobs = parsed.jobs;
+        }
+        if (Array.isArray(parsed.users) && parsed.users.length > 0) {
+          this.users = parsed.users;
+        }
+      }
+    } catch (_) {}
+  }
+
+  saveToStorage() {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    try {
+      localStorage.setItem(
+        'jobmatch_mock_store',
+        JSON.stringify({
+          candidates: this.candidates,
+          jobs: this.jobs,
+          users: this.users,
+        })
+      );
+    } catch (_) {}
   }
 
   // Update candidate profile
   updateCandidate(id: string, data: Partial<MockCandidate>) {
     const candidate = this.candidates.find((c) => c.id === id) || this.candidates[0];
     Object.assign(candidate, data);
+    this.saveToStorage();
     return candidate;
   }
 
@@ -599,6 +635,7 @@ class MockStore {
       createdAt: new Date().toISOString(),
     });
 
+    this.saveToStorage();
     return candidate;
   }
 
@@ -649,7 +686,26 @@ class MockStore {
     };
 
     this.jobs.unshift(newJob);
+    this.saveToStorage();
     return newJob;
+  }
+
+  // Update job
+  updateJob(jobId: string, data: any) {
+    const job = this.jobs.find((j) => j.id === jobId);
+    if (job) {
+      Object.assign(job, data);
+      this.saveToStorage();
+      return job;
+    }
+    return null;
+  }
+
+  // Delete job
+  deleteJob(jobId: string) {
+    this.jobs = this.jobs.filter((j) => j.id !== jobId);
+    this.saveToStorage();
+    return true;
   }
 
   // Add application
@@ -677,6 +733,7 @@ class MockStore {
     if (!job._count) job._count = { applications: 0 };
     job._count.applications += 1;
 
+    this.saveToStorage();
     return { isExisting: false, application: newApp, candidate, job };
   }
 
@@ -686,6 +743,7 @@ class MockStore {
       const app = candidate.applications.find((a) => a.id === applicationId);
       if (app) {
         app.status = status;
+        this.saveToStorage();
         return app;
       }
     }
@@ -770,6 +828,7 @@ class MockStore {
     };
 
     this.users.unshift(newUser);
+    this.saveToStorage();
     return { user: newUser, isExisting: false };
   }
 
